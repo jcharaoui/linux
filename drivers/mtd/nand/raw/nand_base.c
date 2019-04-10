@@ -259,6 +259,54 @@ const struct mtd_pairing_scheme dist3_pairing_scheme = {
 	.get_wunit = nand_pairing_dist3_get_wunit,
 };
 
+static int nand_pairing_dist6_get_info(struct mtd_info *mtd, int page,
+				       struct mtd_pairing_info *info)
+{
+	int lastpage = (mtd->erasesize / mtd->writesize) - 1;
+	int half = page / 2;
+	int dist = 6;
+
+	if (half == lastpage / 2)
+		dist = 4;
+
+	if (!half  || (half & 1)) {
+		info->group = 0;
+		info->pair = (page + 2) / 2;
+	} else {
+		info->group = 1;
+		info->pair = (page + 2 - dist) / 2;
+	}
+
+	return 0;
+}
+
+static int nand_pairing_dist6_get_wunit(struct mtd_info *mtd,
+				       const struct mtd_pairing_info *info)
+{
+	int lastpair = ((mtd->erasesize / mtd->writesize) - 1) / 2;
+	int page = info->pair * 2;
+	int dist = 6;
+
+	if (!info->group && !info->pair)
+		return 0;
+
+	if (info->pair >= lastpair - 1 && info->group)
+		dist = 4;
+
+	if (!info->group)
+		page += 2;
+	else
+		page += dist - 2;
+
+	return page;
+}
+
+const struct mtd_pairing_scheme dist6_pairing_scheme = {
+	.ngroups = 2,
+	.get_info = nand_pairing_dist6_get_info,
+	.get_wunit = nand_pairing_dist6_get_wunit,
+};
+
 static int check_offs_len(struct nand_chip *chip, loff_t ofs, uint64_t len)
 {
 	int ret = 0;

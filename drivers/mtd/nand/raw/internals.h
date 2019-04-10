@@ -76,6 +76,7 @@ extern const struct nand_manufacturer_ops toshiba_nand_manuf_ops;
 
 /* MLC pairing schemes */
 extern const struct mtd_pairing_scheme dist3_pairing_scheme;
+extern const struct mtd_pairing_scheme dist6_pairing_scheme;
 
 /* Core functions */
 const struct nand_manufacturer *nand_get_manufacturer(u8 id);
