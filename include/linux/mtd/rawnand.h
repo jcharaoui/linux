@@ -1210,6 +1210,7 @@ static inline void *nand_get_manufacturer_data(struct nand_chip *chip)
  * @onfi_timing_mode_default: the default ONFI timing mode entered after a NAND
  *			      reset. Should be deduced from timings described
  *			      in the datasheet.
+ * @pairing: The page pairing scheme used by this NAND, if any.
  *
  */
 struct nand_flash_dev {
@@ -1232,6 +1233,7 @@ struct nand_flash_dev {
 		uint16_t step_ds;
 	} ecc;
 	int onfi_timing_mode_default;
+    const struct mtd_pairing_scheme *pairing;
 };
 
 int nand_create_bbt(struct nand_chip *chip);
