@@ -563,7 +563,8 @@ int add_mtd_device(struct mtd_info *mtd)
 		int ngroups = mtd_pairing_groups(master);
 
 		mtd->erasesize /= ngroups;
-		mtd->size = mtd_div_by_eb(mtd->size, master) * mtd->erasesize;
+		mtd->size = (u64)mtd_div_by_eb(mtd->size, master) *
+			    mtd->erasesize;
 	}
 
 	if (is_power_of_2(mtd->erasesize))
@@ -1023,9 +1024,9 @@ int mtd_erase(struct mtd_info *mtd, struct erase_info *instr)
 	ledtrig_mtd_activity();
 
 	if (mtd->flags & MTD_MLC_IN_SLC_MODE) {
-		adjinstr.addr = mtd_div_by_eb(instr->addr, mtd) *
+		adjinstr.addr = (loff_t)mtd_div_by_eb(instr->addr, mtd) *
 				master->erasesize;
-		adjinstr.len = (mtd_div_by_eb(instr->addr + instr->len, mtd) *
+		adjinstr.len = ((u64)mtd_div_by_eb(instr->addr + instr->len, mtd) *
 				master->erasesize) -
 			       adjinstr.addr;
 	}
@@ -1265,7 +1266,7 @@ static int mtd_oob_io_slc(struct mtd_info *mtd, loff_t start, bool read,
 	loff_t base, pos;
 
 	ebofs = mtd_mod_by_eb(start, mtd);
-	base = mtd_div_by_eb(start, mtd) * master->erasesize;
+	base = (loff_t)mtd_div_by_eb(start, mtd) * master->erasesize;
 	info.group = 0;
 	info.pair = mtd_div_by_ws(ebofs, mtd);
 	pageofs = mtd_mod_by_ws(ebofs, mtd);
@@ -1854,8 +1855,8 @@ int mtd_lock(struct mtd_info *mtd, loff_t ofs, uint64_t len)
 		return 0;
 
 	if (mtd->flags & MTD_MLC_IN_SLC_MODE) {
-		ofs = mtd_div_by_eb(ofs, mtd) * master->erasesize;
-		len = mtd_div_by_eb(len, mtd) * master->erasesize;
+		ofs = (loff_t)mtd_div_by_eb(ofs, mtd) * master->erasesize;
+		len = (u64)mtd_div_by_eb(len, mtd) * master->erasesize;
 	}
 
 	return master->_lock(master, mtd_get_master_ofs(mtd, ofs), len);
@@ -1874,8 +1875,8 @@ int mtd_unlock(struct mtd_info *mtd, loff_t ofs, uint64_t len)
 		return 0;
 
 	if (mtd->flags & MTD_MLC_IN_SLC_MODE) {
-		ofs = mtd_div_by_eb(ofs, mtd) * master->erasesize;
-		len = mtd_div_by_eb(len, mtd) * master->erasesize;
+		ofs = (loff_t)mtd_div_by_eb(ofs, mtd) * master->erasesize;
+		len = (u64)mtd_div_by_eb(len, mtd) * master->erasesize;
 	}
 
 	return master->_unlock(master, mtd_get_master_ofs(mtd, ofs), len);
@@ -1894,8 +1895,8 @@ int mtd_is_locked(struct mtd_info *mtd, loff_t ofs, uint64_t len)
 		return 0;
 
 	if (mtd->flags & MTD_MLC_IN_SLC_MODE) {
-		ofs = mtd_div_by_eb(ofs, mtd) * master->erasesize;
-		len = mtd_div_by_eb(len, mtd) * master->erasesize;
+		ofs = (loff_t)mtd_div_by_eb(ofs, mtd) * master->erasesize;
+		len = (u64)mtd_div_by_eb(len, mtd) * master->erasesize;
 	}
 
 	return master->_is_locked(master, mtd_get_master_ofs(mtd, ofs), len);
@@ -1912,7 +1913,7 @@ int mtd_block_isreserved(struct mtd_info *mtd, loff_t ofs)
 		return 0;
 
 	if (mtd->flags & MTD_MLC_IN_SLC_MODE)
-		ofs = mtd_div_by_eb(ofs, mtd) * master->erasesize;
+		ofs = (loff_t)mtd_div_by_eb(ofs, mtd) * master->erasesize;
 
 	return master->_block_isreserved(master, mtd_get_master_ofs(mtd, ofs));
 }
@@ -1928,7 +1929,7 @@ int mtd_block_isbad(struct mtd_info *mtd, loff_t ofs)
 		return 0;
 
 	if (mtd->flags & MTD_MLC_IN_SLC_MODE)
-		ofs = mtd_div_by_eb(ofs, mtd) * master->erasesize;
+		ofs = (loff_t)mtd_div_by_eb(ofs, mtd) * master->erasesize;
 
 	return master->_block_isbad(master, mtd_get_master_ofs(mtd, ofs));
 }
@@ -1947,7 +1948,7 @@ int mtd_block_markbad(struct mtd_info *mtd, loff_t ofs)
 		return -EROFS;
 
 	if (mtd->flags & MTD_MLC_IN_SLC_MODE)
-		ofs = mtd_div_by_eb(ofs, mtd) * master->erasesize;
+		ofs = (loff_t)mtd_div_by_eb(ofs, mtd) * master->erasesize;
 
 	ret = master->_block_markbad(master, mtd_get_master_ofs(mtd, ofs));
 	if (ret)
